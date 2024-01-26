@@ -1,50 +1,75 @@
-# список, кортеж, словарь и множество
+import random
 
-# !! Список(массив) - упорядоченный набор данных
-# shoplist = ['1', '2', '3', '4']
+class Board:
+    def __init__(self):
+        self.board = [['O' for _ in range(6)] for _ in range(6)] # [[0,0,T,0,X],[],[]]   # доска
+        self.ships = []      # Ship (ship.hits, ship.position)                           # корабли
+        self.hits = set()    # множество {(x,y), (x,y)}
 
-# !! Кортеж(аналог массива - но неизменяемый)
-# zoo = ('питон', 'слон', 'пингвин') # помните, что скобки не обязательны
+    def is_valid_position(self, x, y):
+        if not (0 <= x < 6 and 0 <= y < 6):
+            return False
+        for ship in self.ships:
+            for sx, sy in ship.positions:
+                if abs(x - sx) <= 1 and abs(y - sy) <= 1:
+                    return False
+        return True
 
-# zoo = '1', '2', '3'
-# zoo2 = 'a', 'b', 'c', zoo
-# print(zoo2[3][2])
+    def is_hit(self, x, y):
+        for ship in self.ships:
+            if (x, y) in ship.positions:   # если в ships.ship.positon массиве есть (x,y) - координаты
+                ship.hits.append((x, y))     # добавить выстрел (x,y) в ship.hits
+                self.hits.add((x, y))        # добавить выстрел в Board.hits (x,y)
+                self.board[y][x] = 'X'       # нарисовать 'X' на координате Board.board [y][x]
+                return True                  # вернуть тру
+        self.board[y][x] = 'T'           # Board.board [y][x] = 'T'
+        return False                     # вернуть фолс
 
-# !! Словарь -  (объект)
-# ab = {'a': 22, 'b': '11'}
-# print(ab['a'])
+def get_player_move(board):
+    while True:
+        try:
+            x = int(input("Введите номер столбца (1-6): ")) - 1
+            y = int(input("Введите номер строки (1-6): ")) - 1
+            if (x, y) in board.hits:
+                raise ValueError("Вы уже стреляли в эту клетку!")
+            if not board.is_valid_position(x, y):
+                raise ValueError("Неверный ход!")
+            return x, y
+        except ValueError as e:
+            print(e)
 
-# !! Множество (set) - неупорядоченные наборы простых объектов
-# bri = set(['Бразилия', 'Россия', 'Индия'])
-
-
-a = {(3,4), (1,2), (5,7)}
-a.add((5, 12))
-
-for num in a:
-    print(num[1])
-
-# print()
-if(3,4) in a:
-    print(a)
-
-
-def is_valid_position(x, y):
-    if not (0 <= x < 6 and 0 <= y < 6):
-        return False
-    # for ship in self.ships:
-    #     for sx, sy in ship.positions:
-    #         if abs(x - sx) <= 1 and abs(y - sy) <= 1:
-    #             return False
-    return True
-
-print(is_valid_position(1, 22))
-
+# print(get_player_move(Board()))
 class Ship:
     def __init__(self, positions):
-        self.positions = positions  # ?? массив [(x,y), (x,y)] - в зависимости какой длины корабль
-        self.hits = []   # список - массив [(x, y), (x, y)]
+        self.positions = positions
+        self.hits = []
 
-bb = Ship({(2,3)})
-# bb.positions.
-print(bb.positions)
+
+def create_random_ships():
+    ship_lengths = [3, 2, 2, 1, 1, 1, 1]
+    ships = []
+    for length in ship_lengths:
+        positions = []
+        while len(positions) < length:   # 0 < 3
+            valid_positions = []
+            for x in range(6):
+                for y in range(6):
+                    if (x, y) not in positions and Board().is_valid_position(x, y):
+                        valid_positions.append((x, y))
+
+            if len(valid_positions) == 0:
+                break
+
+            x, y = random.choice(valid_positions)
+            positions.append((x, y))
+        ships.append(Ship(positions))
+
+    return ships
+
+positions = []
+valid_positions = []
+for x in range(6):
+    for y in range(6):
+        if (x, y) not in positions and Board().is_valid_position(x, y):
+            valid_positions.append((x, y))
+

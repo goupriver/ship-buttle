@@ -1,8 +1,13 @@
+import random
+import time
+
 class Ship:
     def __init__(self, positions):
-        self.positions = positions  # ?? массив [(x,y), (x,y)] - в зависимости какой длины корабль
-        self.hits = []   # список - массив [(x, y), (x, y)]
+        self.positions = positions  # ?? массив [(x,y), (x,y)] - позиции точек корабля
+        self.hits = []   # список - массив [(x, y), (x, y)] - список выстрелов по кораблю
 
+    def is_sunk(self):
+        return len(self.hits) == len(self.positions)
 
 class Board:
     def __init__(self):
@@ -16,25 +21,32 @@ class Board:
             print(f'{i+1} | {" | ".join(row)} |')
 
     def is_valid_position(self, x, y):
+        # print(x, y)
         if not (0 <= x < 6 and 0 <= y < 6):
+            print('return False')
             return False
-        for ship in self.ships:
-            for sx, sy in ship.positions:
-                if abs(x - sx) <= 1 and abs(y - sy) <= 1:
-                    return False
+        # for ship in self.ships:
+        #     print(ship.positions)
+        #     for sx, sy in ship.positions:
+        #         if abs(x - sx) <= 1 and abs(y - sy) <= 1:
+        #             print('false 2')
+        #             return False
         return True
 
     def is_hit(self, x, y):
         for ship in self.ships:
+            # если x,y в корабль.позиция есть
             if (x, y) in ship.positions:   # если в ships.ship.positon массиве есть (x,y) - координаты
+                                           # positions может иметь вид {(2, 2), (2,3)} или [(2, 2), (2,3)] !
                 ship.hits.append((x, y))     # добавить выстрел (x,y) в ship.hits
                 self.hits.add((x, y))        # добавить выстрел в Board.hits (x,y)
                 self.board[y][x] = 'X'       # нарисовать 'X' на координате Board.board [y][x]
                 return True                  # вернуть тру
+        # нарисовать на доске 'T'
         self.board[y][x] = 'T'           # Board.board [y][x] = 'T'
         return False                     # вернуть фолс
 
-
+# ПРОВЕРЕНО
 def get_player_move(board):
     while True:
         try:
@@ -48,9 +60,40 @@ def get_player_move(board):
         except ValueError as e:
             print(e)
 
+def get_computer_move(board):
+    while True:
+        x = random.randint(0, 5)
+        y = random.randint(0, 5)
+        if (x, y) not in board.hits:
+            return x, y
+
+def create_random_ships():
+    ship_lengths = [3, 2, 2, 1, 1, 1, 1]
+    ships = []
+    for length in ship_lengths:
+        positions = []
+        while len(positions) < length:
+            valid_positions = []
+            for x in range(6):
+                for y in range(6):
+                    if (x, y) not in positions and Board().is_valid_position(x, y):
+                        valid_positions.append((x, y))
+
+            if len(valid_positions) == 0:
+                break
+
+            x, y = random.choice(valid_positions)
+            positions.append((x, y))
+        ships.append(Ship(positions))
+
+    return ships
+
 def play_game():
     player_board = Board()
     computer_board = Board()
+
+    player_board.ships = create_random_ships()
+    computer_board.ships = create_random_ships()
 
     while True:
         print("Ваша доска:")
@@ -71,6 +114,19 @@ def play_game():
             print("Вы промахнулись!")
 
 
+        computer_x, computer_y = get_computer_move(player_board)
+
+        time.sleep(1)
+
+        if player_board.is_hit(computer_x, computer_y):
+            print("Компьютер попал по вашему кораблю!")
+            if all(ship.is_sunk() for ship in player_board.ships):
+                print("Компьютер выиграл!")
+                break
+        else:
+            print("Компьютер промахнулся!")
+
+        time.sleep(2)
 
 
 play_game()
