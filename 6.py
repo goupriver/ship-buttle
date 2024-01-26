@@ -1,6 +1,23 @@
 import random
 import time
 
+def coloredString(color, string):
+
+    END = "\033[0m"
+    RED = "\033[0;31m"
+    GREEN = "\033[0;32m"
+    BLUE = "\033[0;34m"
+    YELLOW = "\033[1;33m"
+
+    if color == 'BLUE':
+        return BLUE + string + END
+    if color == 'RED':
+        return RED + string + END
+    if color == 'GREEN':
+        return GREEN + string + END
+    if color == 'YELLOW':
+        return YELLOW + string + END
+
 class Ship:
     def __init__(self, positions):
         self.positions = positions  # ?? массив [(x,y), (x,y)] - позиции точек корабля
@@ -16,7 +33,7 @@ class Board:
         self.hits = set()    # множество {(x,y), (x,y)}                                  # удар
 
     def print_board(self):
-        print('  | 1 | 2 | 3 | 4 | 5 | 6 |')
+        print("  | 1 | 2 | 3 | 4 | 5 | 6 |")
         for i, row in enumerate(self.board):
             print(f'{i+1} | {" | ".join(row)} |')
 
@@ -51,12 +68,12 @@ class Board:
 def get_player_move(board):
     while True:
         try:
-            x = int(input("Введите номер столбца (1-6): ")) - 1
-            y = int(input("Введите номер строки (1-6): ")) - 1
+            x = int(input(coloredString("BLUE", "Введите номер столбца (1-6): "))) - 1
+            y = int(input(coloredString("BLUE", "Введите номер строки (1-6): "))) - 1
             if (x, y) in board.hits:
-                raise ValueError("Вы уже стреляли в эту клетку!")
+                raise ValueError(coloredString("YELLOW", "Вы уже стреляли в эту клетку!"))
             if not board.is_valid_position(x, y):
-                raise ValueError("Неверный ход!")
+                raise ValueError(coloredString("YELLOW", "Неверный ход!"))
             return x, y
         except ValueError as e:
             print(e)
@@ -107,12 +124,12 @@ def play_game():
         player_x, player_y = get_player_move(computer_board)
 
         if computer_board.is_hit(player_x, player_y):
-            print("Вы попали по кораблю противника!")
+            print(coloredString("GREEN", "Вы попали по кораблю противника!"))
             if all(ship.is_sunk() for ship in computer_board.ships):
-                print("Вы выиграли!")
+                print(coloredString("GREEN", "Вы выиграли!"))
                 break
         else:
-            print("Вы промахнулись!")
+            print(coloredString("YELLOW", "Вы промахнулись!"))
 
 
         computer_x, computer_y = get_computer_move(player_board)
@@ -120,12 +137,12 @@ def play_game():
         time.sleep(1)
 
         if player_board.is_hit(computer_x, computer_y):
-            print("Компьютер попал по вашему кораблю!")
+            print(coloredString("RED", "Компьютер попал по вашему кораблю!"))
             if all(ship.is_sunk() for ship in player_board.ships):
-                print("Компьютер выиграл!")
+                print(coloredString("RED", "Компьютер выиграл!"))
                 break
         else:
-            print("Компьютер промахнулся!")
+            print(coloredString("GREEN", "Компьютер промахнулся!"))
 
         time.sleep(2)
 
