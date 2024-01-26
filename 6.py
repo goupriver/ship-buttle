@@ -21,25 +21,26 @@ class Board:
             print(f'{i+1} | {" | ".join(row)} |')
 
     def is_valid_position(self, x, y):
-        # print(x, y)
         if not (0 <= x < 6 and 0 <= y < 6):
-            print('return False')
             return False
-        # for ship in self.ships:
-        #     print(ship.positions)
-        #     for sx, sy in ship.positions:
-        #         if abs(x - sx) <= 1 and abs(y - sy) <= 1:
-        #             print('false 2')
-        #             return False
+
+        # for hit in self.hits:
+        #     if abs(x - hit[0]) <= 1 and abs(y - hit[1]) <= 1:
+        #         return False
+        for hit in self.hits:
+            if x == hit[0] and y == hit[1]:
+                return False
+
         return True
 
     def is_hit(self, x, y):
+        self.hits.add((x, y))  # добавить выстрел в Board.hits (x,y)
         for ship in self.ships:
             # если x,y в корабль.позиция есть
             if (x, y) in ship.positions:   # если в ships.ship.positon массиве есть (x,y) - координаты
                                            # positions может иметь вид {(2, 2), (2,3)} или [(2, 2), (2,3)] !
                 ship.hits.append((x, y))     # добавить выстрел (x,y) в ship.hits
-                self.hits.add((x, y))        # добавить выстрел в Board.hits (x,y)
+                # self.hits.add((x, y))        # добавить выстрел в Board.hits (x,y)
                 self.board[y][x] = 'X'       # нарисовать 'X' на координате Board.board [y][x]
                 return True                  # вернуть тру
         # нарисовать на доске 'T'
